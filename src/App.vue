@@ -1,6 +1,10 @@
 <template>
   <div class="app-content">
-    <div id="container"></div>
+    <div id="container" style="position: relative; width: 100%; height: 100%"></div>
+    <div id="overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none"></div>
+
+    <!-- 自定义component被渲染时，在逻辑关系上都位于这个Container内 -->
+    <!-- 然后被teleport到对应节点的foreignObject内 -->
     <TeleportContainer />
   </div>
 </template>
@@ -9,15 +13,16 @@
 import {defineComponent} from "vue";
 import ProgressNode from "./components/ProgressNode.vue";
 import {Graph} from "@antv/x6";
-import {register, getTeleport} from "@antv/x6-vue-shape";
+import {getTeleport, register} from "@antv/x6-vue-shape";
+// import {Dnd} from "@antv/x6-plugin-dnd";
+// import {Snapline} from "@antv/x6-plugin-snapline";
+
+const TeleportContainer = getTeleport();
 
 register({
-  shape: "custom-vue-node",
-  width: 100,
-  height: 100,
+  shape: "custom-progress",
   component: ProgressNode
 });
-const TeleportContainer = getTeleport();
 
 export default defineComponent({
   name: "App",
@@ -32,11 +37,15 @@ export default defineComponent({
       },
       autoResize: true
     });
+    window.__x6_instances__ = [];
+    window.__x6_instances__.push(graph);
 
     const node = graph.addNode({
-      shape: "custom-vue-node",
-      x: 100,
+      shape: "custom-progress",
+      x: 60,
       y: 60,
+      width: 100,
+      height: 100,
       data: {
         progress: 10
       }
@@ -65,10 +74,6 @@ export default defineComponent({
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-}
-#container {
-  width: 100%;
-  height: 100%;
+  height: 98vh;
 }
 </style>
