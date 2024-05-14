@@ -136,9 +136,9 @@ export default defineComponent({
                 {
                     title: "其他",
                     name: "group3",
-                    graphHeight: 250,
+                    graphHeight: 300,
                     layoutOptions: {
-                        rowHeight: 70
+                        rowHeight: 100
                     }
                 }
             ],
@@ -198,7 +198,7 @@ export default defineComponent({
         });
 
         // delete
-        graph.bindKey("backspace", () => {
+        graph.bindKey(["Delete", "Backspace"], () => {
             const cells = graph.getSelectedCells();
             if (cells.length) {
                 graph.removeCells(cells);
@@ -217,6 +217,10 @@ export default defineComponent({
             if (zoom > 0.5) {
                 graph.zoom(-0.1);
             }
+        });
+        graph.on("edge:dblclick", ({edge}) => {
+            // 当用户点击边时，选中这个边
+            graph.removeCell(edge);
         });
 
         // 控制连接桩显示/隐藏

@@ -1,6 +1,6 @@
 <template>
     <div>
-        <a-progress type="circle" :percent="progress" :size="60" />
+        <a-progress type="circle" :percent="progress" :size="100" />
     </div>
 </template>
 
