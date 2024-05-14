@@ -1,9 +1,7 @@
 <template>
-    <el-progress type="dashboard" :percentage="percentage" :width="80">
-        <template #default="{percentage}">
-            <span class="percentage-value">{{ percentage }}%</span>
-        </template>
-    </el-progress>
+    <div>
+        <a-progress type="circle" :percent="progress" :size="60" />
+    </div>
 </template>
 
 <script lang="ts">
@@ -14,17 +12,17 @@ export default defineComponent({
     inject: ["getNode"],
     data() {
         return {
-            percentage: 0
+            progress: 0
         };
     },
     mounted() {
         // x6-vue-shape为vue component默认”provide“了getNode方法；
         // 在前面的component定义里显式地”inject“了getNode方法
         const node = (this as any).getNode();
-        this.percentage = node.getData().progress;
+        this.progress = node.getData().progress;
         node.on("change:data", ({current}: {current: {progress: number}}) => {
             const {progress} = current;
-            this.percentage = progress;
+            this.progress = progress;
         });
     }
 });
