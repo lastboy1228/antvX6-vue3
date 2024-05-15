@@ -19,9 +19,9 @@ import {Snapline} from "@antv/x6-plugin-snapline";
 import {Keyboard} from "@antv/x6-plugin-keyboard";
 import {Clipboard} from "@antv/x6-plugin-clipboard";
 import {History} from "@antv/x6-plugin-history";
-import  "./init";
-const TeleportContainer = getTeleport();
+import "./initShapes";
 
+const TeleportContainer = getTeleport();
 
 export default defineComponent({
     name: "App",
@@ -108,6 +108,7 @@ export default defineComponent({
                     strict: true,
                     showNodeSelectionBox: true,
                     showEdgeSelectionBox: false,
+                    // 选中后，可操作内部html元素
                     pointerEvents: "none"
                 })
             )
@@ -227,8 +228,17 @@ export default defineComponent({
             // 当用户点击边时，选中这个边
             graph.removeCell(edge);
         });
-        graph.on("node:resize", ({node}) => {
-            console.info(node.shape);
+        graph.on("edge:mouseenter", ({cell}) => {
+            if (!cell.hasTool("vertices")) {
+                cell.addTools({
+                    name: "vertices"
+                });
+            }
+        });
+        graph.on("edge:mouseleave", ({cell}) => {
+            if (cell.hasTool("vertices")) {
+                cell.removeTool("vertices");
+            }
         });
 
         // 控制连接桩显示/隐藏
