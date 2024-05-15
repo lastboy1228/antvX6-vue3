@@ -11,8 +11,9 @@
 <script lang="ts">
 import {defineComponent} from "vue";
 import ProgressNode from "./components/ProgressNode.vue";
+import ServiceContainer from "./components/ServiceContainer.vue";
 import {getTeleport, register} from "@antv/x6-vue-shape";
-import {Graph, Shape} from "@antv/x6";
+import {Graph, Node, Shape} from "@antv/x6";
 import {Stencil} from "@antv/x6-plugin-stencil";
 import {Transform} from "@antv/x6-plugin-transform";
 import {Selection} from "@antv/x6-plugin-selection";
@@ -22,9 +23,93 @@ import {Clipboard} from "@antv/x6-plugin-clipboard";
 import {History} from "@antv/x6-plugin-history";
 const TeleportContainer = getTeleport();
 
+const ports = {
+    groups: {
+        top: {
+            position: "top",
+            attrs: {
+                circle: {
+                    r: 4,
+                    magnet: true,
+                    stroke: "#5F95FF",
+                    strokeWidth: 1,
+                    fill: "#fff",
+                    style: {
+                        visibility: "hidden"
+                    }
+                }
+            }
+        },
+        right: {
+            position: "right",
+            attrs: {
+                circle: {
+                    r: 4,
+                    magnet: true,
+                    stroke: "#5F95FF",
+                    strokeWidth: 1,
+                    fill: "#fff",
+                    style: {
+                        visibility: "hidden"
+                    }
+                }
+            }
+        },
+        bottom: {
+            position: "bottom",
+            attrs: {
+                circle: {
+                    r: 4,
+                    magnet: true,
+                    stroke: "#5F95FF",
+                    strokeWidth: 1,
+                    fill: "#fff",
+                    style: {
+                        visibility: "hidden"
+                    }
+                }
+            }
+        },
+        left: {
+            position: "left",
+            attrs: {
+                circle: {
+                    r: 4,
+                    magnet: true,
+                    stroke: "#5F95FF",
+                    strokeWidth: 1,
+                    fill: "#fff",
+                    style: {
+                        visibility: "hidden"
+                    }
+                }
+            }
+        }
+    },
+    items: [
+        {
+            group: "top"
+        },
+        {
+            group: "right"
+        },
+        {
+            group: "bottom"
+        },
+        {
+            group: "left"
+        }
+    ]
+};
 register({
     shape: "custom-progress",
-    component: ProgressNode
+    component: ProgressNode,
+    ports: {...ports}
+});
+register({
+    shape: "custom-service-container",
+    component: ServiceContainer,
+    ports: {...ports}
 });
 
 export default defineComponent({
@@ -98,14 +183,21 @@ export default defineComponent({
         graph
             .use(
                 new Transform({
-                    resizing: true,
+                    resizing: {
+                        enabled(node: Node) {
+                            return node.shape !== "none";
+                        }
+                    },
                     rotating: false
                 })
             )
             .use(
                 new Selection({
                     rubberband: true,
-                    showNodeSelectionBox: true
+                    strict: true,
+                    showNodeSelectionBox: true,
+                    showEdgeSelectionBox: false,
+                    pointerEvents: "none"
                 })
             )
             .use(new Snapline())
@@ -138,7 +230,8 @@ export default defineComponent({
                     name: "group3",
                     graphHeight: 300,
                     layoutOptions: {
-                        rowHeight: 100
+                        columns: 1,
+                        rowHeight: 150
                     }
                 }
             ],
@@ -218,9 +311,13 @@ export default defineComponent({
                 graph.zoom(-0.1);
             }
         });
+
         graph.on("edge:dblclick", ({edge}) => {
             // 当用户点击边时，选中这个边
             graph.removeCell(edge);
+        });
+        graph.on("node:resize", ({node}) => {
+            console.info(node.shape);
         });
 
         // 控制连接桩显示/隐藏
@@ -242,84 +339,6 @@ export default defineComponent({
         // #endregion
 
         // #region 定义图形
-        const ports = {
-            groups: {
-                top: {
-                    position: "top",
-                    attrs: {
-                        circle: {
-                            r: 4,
-                            magnet: true,
-                            stroke: "#5F95FF",
-                            strokeWidth: 1,
-                            fill: "#fff",
-                            style: {
-                                visibility: "hidden"
-                            }
-                        }
-                    }
-                },
-                right: {
-                    position: "right",
-                    attrs: {
-                        circle: {
-                            r: 4,
-                            magnet: true,
-                            stroke: "#5F95FF",
-                            strokeWidth: 1,
-                            fill: "#fff",
-                            style: {
-                                visibility: "hidden"
-                            }
-                        }
-                    }
-                },
-                bottom: {
-                    position: "bottom",
-                    attrs: {
-                        circle: {
-                            r: 4,
-                            magnet: true,
-                            stroke: "#5F95FF",
-                            strokeWidth: 1,
-                            fill: "#fff",
-                            style: {
-                                visibility: "hidden"
-                            }
-                        }
-                    }
-                },
-                left: {
-                    position: "left",
-                    attrs: {
-                        circle: {
-                            r: 4,
-                            magnet: true,
-                            stroke: "#5F95FF",
-                            strokeWidth: 1,
-                            fill: "#fff",
-                            style: {
-                                visibility: "hidden"
-                            }
-                        }
-                    }
-                }
-            },
-            items: [
-                {
-                    group: "top"
-                },
-                {
-                    group: "right"
-                },
-                {
-                    group: "bottom"
-                },
-                {
-                    group: "left"
-                }
-            ]
-        };
 
         Graph.registerNode(
             "custom-rect",
@@ -532,16 +551,21 @@ export default defineComponent({
 
         const customProgress = graph.createNode({
             shape: "custom-progress",
-            x: 60,
-            y: 60,
             width: 100,
             height: 100,
-            ports: {...ports},
             data: {
                 progress: 10
             }
         });
-        stencil.load([customProgress], "group3");
+        const customServiceContainer = graph.createNode({
+            shape: "custom-service-container",
+            width: 100,
+            height: 145,
+            data: {
+                txt: "test"
+            }
+        });
+        stencil.load([customProgress, customServiceContainer], "group3");
         // #endregion
     }
 });
