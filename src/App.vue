@@ -228,16 +228,20 @@ export default defineComponent({
             // 当用户点击边时，选中这个边
             graph.removeCell(edge);
         });
-        graph.on("edge:mouseenter", ({cell}) => {
-            if (!cell.hasTool("vertices")) {
-                cell.addTools({
-                    name: "vertices"
+        graph.on("edge:mouseenter", ({edge}) => {
+            if (!edge.hasTool("vertices")) {
+                edge.addTools({
+                    name: "vertices",
+                    args: {
+                        removable: false,
+                        removeRedundancies: true
+                    }
                 });
             }
         });
-        graph.on("edge:mouseleave", ({cell}) => {
-            if (cell.hasTool("vertices")) {
-                cell.removeTool("vertices");
+        graph.on("edge:mouseleave", ({edge}) => {
+            if (edge.hasTool("vertices")) {
+                edge.removeTool("vertices");
             }
         });
 
@@ -358,7 +362,7 @@ export default defineComponent({
         const customServiceContainer = graph.createNode({
             shape: "custom-service-container",
             width: 100,
-            height: 145,
+            height: 40,
             data: {
                 txt: "test"
             }

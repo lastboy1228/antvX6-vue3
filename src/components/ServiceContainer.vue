@@ -1,39 +1,22 @@
 <template>
-    <div>
-        <a-collapse v-model:activeKey="activeKey" @change="changeActivekey">
-            <a-collapse-panel key="1" header="header1">
-                <a-collapse default-active-key="4">
-                    <a-collapse-panel key="4" header="This is panel nest panel">
-                        <p>{{ txt }}</p>
-                    </a-collapse-panel>
-                </a-collapse>
-            </a-collapse-panel>
-            <a-collapse-panel key="2" header="2">
-                <p>{{ txt }}</p>
-            </a-collapse-panel>
-            <a-collapse-panel key="3" header="3">
-                <p>{{ txt }}</p>
-            </a-collapse-panel>
-        </a-collapse>
+    <div ref="serviceContainer">
+        <a-input-search v-model:value="serviceName" placeholder="" enter-button="添加" size="large" @search="onSearch" />
+        <li v-for="service in services" :key="service">{{ service }}</li>
     </div>
 </template>
 
 <script lang="ts">
-import {defineComponent, ref} from "vue";
+import {defineComponent} from "vue";
 
 export default defineComponent({
     name: "ProgressNode",
     inject: ["getNode"],
     data() {
         return {
-            activeKey: ref([]),
+            services: [] as string[],
+            serviceName: "",
             txt: ""
         };
-    },
-    methods: {
-        changeActivekey(key: string) {
-            console.log(key);
-        }
     },
     mounted() {
         // x6-vue-shape为vue component默认”provide“了getNode方法；
@@ -44,7 +27,22 @@ export default defineComponent({
             const {txt} = current;
             this.txt = txt;
         });
-        
+    },
+    methods: {
+        onSearch() {
+            if (this.serviceName == "") {
+                return;
+            }
+            this.services.includes(this.serviceName) || this.services.push(this.serviceName);
+            this.serviceName = "";
+            const el = this.$refs.serviceContainer as HTMLElement;
+            // 保持node的size和html元素的size一致
+            this.$nextTick(() => {
+                const node = (this as any).getNode();
+                console.log(el.offsetWidth, el.offsetHeight);
+                node.prop("size", {width: el.offsetWidth, height: el.offsetHeight});
+            });
+        }
     }
 });
 </script>
