@@ -23,6 +23,7 @@ export default defineComponent({
         // 在前面的component定义里显式地”inject“了getNode方法
         const node = (this as any).getNode();
         this.txt = node.getData().txt;
+        this.serviceName = node.getData().services || [];
         node.on("change:data", ({current}: {current: {txt: string}}) => {
             const {txt} = current;
             this.txt = txt;
@@ -39,6 +40,7 @@ export default defineComponent({
             // 保持node的size和html元素的size一致
             this.$nextTick(() => {
                 const node = (this as any).getNode();
+                node.setData({services: this.services}, {silent: true});
                 console.log(el.offsetWidth, el.offsetHeight);
                 node.prop("size", {width: el.offsetWidth, height: el.offsetHeight});
             });
