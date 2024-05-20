@@ -1,7 +1,13 @@
 <template>
-    <div id="container">
-        <div id="stencil" ref="stencilContainer"></div>
-        <div id="graph-container" ref="graphContainer"></div>
+    <div id="app-main">
+        <div id="app-header">
+            <a-button type="primary" @click="exportConfig">导出配置</a-button>
+            <a-button @click="importConfig">导入配置</a-button>
+        </div>
+        <div id="app-container">
+            <div id="stencil" ref="stencilContainer">Nav</div>
+            <div id="graph-container" ref="graphContainer">Content</div>
+        </div>
         <!-- 自定义component被渲染时，在逻辑关系上都位于这个Container内 -->
         <!-- 然后被teleport到对应节点的foreignObject内 -->
         <TeleportContainer />
@@ -138,7 +144,7 @@ export default defineComponent({
                     }
                 },
                 {
-                    title: "其他",
+                    title: "vue组件",
                     name: "group3",
                     graphHeight: 300,
                     layoutOptions: {
@@ -369,25 +375,79 @@ export default defineComponent({
         });
         stencil.load([customProgress, customServiceContainer], "group3");
         // #endregion
+    },
+    methods: {
+        exportConfig() {
+            const graph = window.__x6_instances__ && window.__x6_instances__[0];
+            if (graph) {
+                console.log(graph.toJSON());
+                // 弹出保存对话框，把配置保存为文件
+                const config = graph.toJSON();
+                const json = JSON.stringify(config, null, 2);
+                const blob = new Blob([json], {type: "text/plain"});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "config.json";
+                a.click();
+
+                // 释放这个URL
+                URL.revokeObjectURL(url);
+            }
+        },
+        importConfig() {
+            const input = document.createElement("input");
+            input.type = "file";
+            input.accept = ".json";
+            input.onchange = async () => {
+                const file = input.files && input.files[0];
+                if (file) {
+                    const text = await file.text();
+                    const config = JSON.parse(text);
+                    const graph = window.__x6_instances__ && window.__x6_instances__[0];
+                    if (graph) {
+                        graph.fromJSON(config);
+                    }
+                }
+                // 移除input
+                input.remove();
+            };
+            input.click();        
+        }
     }
 });
 </script>
 
 <style scoped>
-#container {
+#app-main {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 98vh;
-    border: 1px solid #dfe3e8;
+    flex-direction: column;
+    height: 99vh;
 }
+
+#app-header {
+    height: 30px;
+}
+
+#app-container {
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+}
+
 #stencil {
     width: 180px;
-    height: 100%;
     position: relative;
     border-right: 1px solid #dfe3e8;
 }
+
 #graph-container {
+    flex-grow: 1;
+    position: relative;
+}
+
+#graph-container {
+    position: relative;
     width: calc(100% - 180px);
     height: 100%;
 }
