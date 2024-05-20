@@ -8,6 +8,7 @@
             <div id="stencil" ref="stencilContainer">Nav</div>
             <div id="graph-container" ref="graphContainer">Content</div>
         </div>
+        <div id="mini-graph-container" ref="miniGraphContainer"></div>
         <!-- 自定义component被渲染时，在逻辑关系上都位于这个Container内 -->
         <!-- 然后被teleport到对应节点的foreignObject内 -->
         <TeleportContainer />
@@ -25,6 +26,8 @@ import {Snapline} from "@antv/x6-plugin-snapline";
 import {Keyboard} from "@antv/x6-plugin-keyboard";
 import {Clipboard} from "@antv/x6-plugin-clipboard";
 import {History} from "@antv/x6-plugin-history";
+import {Scroller} from "@antv/x6-plugin-scroller";
+import {MiniMap} from "@antv/x6-plugin-minimap";
 import "./initShapes";
 
 const TeleportContainer = getTeleport();
@@ -110,12 +113,26 @@ export default defineComponent({
             )
             .use(
                 new Selection({
-                    rubberband: true,
+                    rubberband: false,
                     strict: true,
                     showNodeSelectionBox: true,
-                    showEdgeSelectionBox: false,
+                    showEdgeSelectionBox: true,
                     // 选中后，可操作内部html元素
                     pointerEvents: "none"
+                })
+            )
+            .use(
+                new Scroller({
+                    enabled: true,
+                    pageVisible: true,
+                    pageBreak: true
+                })
+            )
+            .use(
+                new MiniMap({
+                    container: this.$refs.miniGraphContainer as HTMLElement,
+                    width: 200,
+                    height: 160
                 })
             )
             .use(new Snapline())
@@ -149,7 +166,8 @@ export default defineComponent({
                     graphHeight: 300,
                     layoutOptions: {
                         columns: 1,
-                        rowHeight: 150
+                        rowHeight: 150,
+                        columnWidth: 150
                     }
                 }
             ],
@@ -367,7 +385,7 @@ export default defineComponent({
         });
         const customServiceContainer = graph.createNode({
             shape: "custom-service-container",
-            width: 100,
+            width: 150,
             height: 40,
             data: {
                 txt: "test"
@@ -400,9 +418,11 @@ export default defineComponent({
             input.type = "file";
             input.accept = ".json";
             input.onchange = async () => {
+                console.log("准备加载配置文件");
                 const file = input.files && input.files[0];
                 if (file) {
                     const text = await file.text();
+                    console.log("已读取配置文件");
                     const config = JSON.parse(text);
                     const graph = window.__x6_instances__ && window.__x6_instances__[0];
                     if (graph) {
@@ -412,7 +432,7 @@ export default defineComponent({
                 // 移除input
                 input.remove();
             };
-            input.click();        
+            input.click();
         }
     }
 });
@@ -450,6 +470,15 @@ export default defineComponent({
     position: relative;
     width: calc(100% - 180px);
     height: 100%;
+}
+
+#mini-graph-container {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    width: 200px;
+    height: 160px;
+    background-color: rgb(224, 213, 213);
 }
 .x6-widget-stencil {
     background-color: #fff;
