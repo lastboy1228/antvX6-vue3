@@ -7,7 +7,7 @@
 
 <script lang="ts">
 import {defineComponent} from "vue";
-
+import {Node} from "@antv/x6";
 export default defineComponent({
     name: "ServiceContainer",
     inject: ["getNode"],
@@ -20,10 +20,11 @@ export default defineComponent({
     mounted() {
         // x6-vue-shape为vue component默认”provide“了getNode方法；
         // 在前面的component定义里显式地”inject“了getNode方法
-        const node = (this as any).getNode();
+        const node: Node = (this as any).getNode();
+        // 根据node存储的data，来渲染html元素
         this.services = node.getData().services || [];
         console.log("ServiceContainer's services", this.services);
-        // 不需要监听change:data事件，因为不通过设置node的data来更新vue组件
+        // 监听本节点的change:data事件，主要用于切换告警状态
         // node.on("change:data", ({current}: {current: {services: string[]}}) => {
         //     const {services} = current;
         //     this.services = services || [];

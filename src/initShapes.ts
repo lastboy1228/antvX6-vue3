@@ -94,7 +94,30 @@ Graph.registerNode(
             body: {
                 strokeWidth: 1,
                 stroke: "#5F95FF",
-                fill: "#EFF4FF"
+                fill: "#EFF4FF"                
+            },
+            text: {
+                fontSize: 12,
+                fill: "#262626"
+            }
+        },
+        ports: { ...ports }
+    },
+    true
+);
+
+Graph.registerNode(
+    "custom-container",
+    {
+        inherit: "rect",
+        width: 66,
+        height: 36,
+        attrs: {
+            body: {
+                strokeWidth: 1,
+                stroke: "#5F95FF",
+                strokeDasharray: '5,5', // 设置虚线边框
+                fill: "transparent", // 设置透明背景
             },
             text: {
                 fontSize: 12,

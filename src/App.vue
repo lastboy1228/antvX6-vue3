@@ -76,7 +76,7 @@ export default defineComponent({
                                 }
                             }
                         },
-                        zIndex: 0
+                        zIndex: 2
                     });
                 },
                 validateConnection({targetMagnet}) {
@@ -113,7 +113,7 @@ export default defineComponent({
             )
             .use(
                 new Selection({
-                    rubberband: false,
+                    rubberband: true,
                     strict: true,
                     showNodeSelectionBox: true,
                     showEdgeSelectionBox: true,
@@ -124,15 +124,19 @@ export default defineComponent({
             .use(
                 new Scroller({
                     enabled: true,
+                    pannable: false,
                     pageVisible: true,
-                    pageBreak: true
+                    pageBreak: false,
+                    pageWidth: 400,
+                    pageHeight: 400,
+                    padding: 50
                 })
             )
             .use(
                 new MiniMap({
                     container: this.$refs.miniGraphContainer as HTMLElement,
-                    width: 200,
-                    height: 160
+                    width: 300,
+                    height: 300
                 })
             )
             .use(new Snapline())
@@ -163,6 +167,16 @@ export default defineComponent({
                 {
                     title: "vue组件",
                     name: "group3",
+                    graphHeight: 300,
+                    layoutOptions: {
+                        columns: 1,
+                        rowHeight: 150,
+                        columnWidth: 150
+                    }
+                },
+                {
+                    title: "容器",
+                    name: "group4",
                     graphHeight: 300,
                     layoutOptions: {
                         columns: 1,
@@ -392,6 +406,13 @@ export default defineComponent({
             }
         });
         stencil.load([customProgress, customServiceContainer], "group3");
+
+        const customContainer = graph.createNode({
+            shape: "custom-container",
+            width: 100,
+            height: 100
+        });
+        stencil.load([customContainer], "group4");
         // #endregion
     },
     methods: {
@@ -476,9 +497,9 @@ export default defineComponent({
     position: fixed;
     right: 20px;
     bottom: 20px;
-    width: 200px;
-    height: 160px;
-    background-color: rgb(224, 213, 213);
+    width: 300px;
+    height: 300px;
+    background-color: rgb(241, 135, 135);
 }
 .x6-widget-stencil {
     background-color: #fff;
