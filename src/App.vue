@@ -42,12 +42,30 @@ export default defineComponent({
         const graph = new Graph({
             container: this.$refs.graphContainer as HTMLElement,
             grid: true,
+            interacting: {
+                nodeMovable: true,
+                arrowheadMovable: true
+            },
             mousewheel: {
                 enabled: true,
                 zoomAtMousePosition: true,
                 modifiers: "ctrl",
                 minScale: 0.5,
                 maxScale: 3
+            },
+            embedding: {
+                enabled: true,
+                // frontOnly: true,
+                findParent({node}) {
+                    const bbox = node.getBBox();
+                    return this.getNodes().filter(targetNode => {
+                        if (targetNode.shape == "custom-container" && node.shape != "custom-container") {
+                            const targetBBox = targetNode.getBBox();
+                            return bbox.isIntersectWithRect(targetBBox);
+                        }
+                        return false;
+                    });
+                }
             },
             connecting: {
                 router: "manhattan",
@@ -92,6 +110,15 @@ export default defineComponent({
                             stroke: "#5F95FF"
                         }
                     }
+                },
+                embedding: {
+                    name: "stroke",
+                    args: {
+                        padding: -1,
+                        attrs: {
+                            stroke: "#73d13d"
+                        }
+                    }
                 }
             }
         });
@@ -116,7 +143,7 @@ export default defineComponent({
                     rubberband: true,
                     strict: true,
                     showNodeSelectionBox: true,
-                    showEdgeSelectionBox: true,
+                    showEdgeSelectionBox: false,
                     // 选中后，可操作内部html元素
                     pointerEvents: "none"
                 })
@@ -232,14 +259,6 @@ export default defineComponent({
             return false;
         });
 
-        // select all
-        graph.bindKey(["meta+a", "ctrl+a"], () => {
-            const nodes = graph.getNodes();
-            if (nodes) {
-                graph.select(nodes);
-            }
-        });
-
         // delete
         graph.bindKey(["Delete", "Backspace"], () => {
             const cells = graph.getSelectedCells();
@@ -263,7 +282,6 @@ export default defineComponent({
         });
 
         graph.on("edge:dblclick", ({edge}) => {
-            // 当用户点击边时，选中这个边
             graph.removeCell(edge);
         });
         graph.on("edge:mouseenter", ({edge}) => {
@@ -280,6 +298,11 @@ export default defineComponent({
         graph.on("edge:mouseleave", ({edge}) => {
             if (edge.hasTool("vertices")) {
                 edge.removeTool("vertices");
+            }
+        });
+        graph.on("node:embedded", ({currentParent}) => {
+            if (currentParent != null) {
+                currentParent.setZIndex(0);
             }
         });
 
@@ -410,7 +433,8 @@ export default defineComponent({
         const customContainer = graph.createNode({
             shape: "custom-container",
             width: 100,
-            height: 100
+            height: 100,
+            zIndex: 0
         });
         stencil.load([customContainer], "group4");
         // #endregion

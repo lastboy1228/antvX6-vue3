@@ -123,8 +123,7 @@ Graph.registerNode(
                 fontSize: 12,
                 fill: "#262626"
             }
-        },
-        ports: { ...ports }
+        }
     },
     true
 );
