@@ -3,6 +3,7 @@
         <div id="app-header">
             <a-button type="primary" @click="exportConfig">导出配置</a-button>
             <a-button @click="importConfig">导入配置</a-button>
+            <a-button @click="pop">侧边栏</a-button>
         </div>
         <div id="app-container">
             <div id="stencil" ref="stencilContainer">Nav</div>
@@ -13,6 +14,9 @@
         <!-- 然后被teleport到对应节点的foreignObject内 -->
         <TeleportContainer />
     </div>
+    <a-drawer :root-style="{color: 'blue'}" placement="right" size="large" :closable="false" :open="open" @close="hide">
+        <g2-chart v-for="chart in charts" :key="chart.index" :type="chart.type" :data="chart.data"></g2-chart>
+    </a-drawer>
 </template>
 
 <script lang="ts">
@@ -29,13 +33,20 @@ import {History} from "@antv/x6-plugin-history";
 import {Scroller} from "@antv/x6-plugin-scroller";
 import {MiniMap} from "@antv/x6-plugin-minimap";
 import "./initShapes";
-
+import G2Chart from "./components/G2Chart.vue";
 const TeleportContainer = getTeleport();
 
 export default defineComponent({
     name: "App",
     components: {
-        TeleportContainer
+        TeleportContainer,
+        G2Chart
+    },
+    data() {
+        return {
+            open: false,
+            charts: [] as {index: Number; type: string; data: any[]}[]
+        };
     },
     mounted() {
         // #region 初始化画布
@@ -202,7 +213,7 @@ export default defineComponent({
                     }
                 },
                 {
-                    title: "容器",
+                    title: "群组",
                     name: "group4",
                     graphHeight: 300,
                     layoutOptions: {
@@ -478,6 +489,30 @@ export default defineComponent({
                 input.remove();
             };
             input.click();
+        },
+        pop() {
+            this.open = true;
+            this.charts = [
+                {
+                    index: 0,
+                    type: "line",
+                    data: [
+                        {year: "1991", value: 3},
+                        {year: "1992", value: 4},
+                        {year: "1993", value: 3.5},
+                        {year: "1994", value: 5},
+                        {year: "1995", value: 4.9},
+                        {year: "1996", value: 6},
+                        {year: "1997", value: 7},
+                        {year: "1998", value: 9},
+                        {year: "1999", value: 13}
+                    ]
+                }
+            ];
+        },
+        hide() {
+            this.open = false;
+            this.charts = [];
         }
     }
 });
